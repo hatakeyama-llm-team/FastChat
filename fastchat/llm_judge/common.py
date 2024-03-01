@@ -169,7 +169,7 @@ def run_judge_single(question, answer, judge, ref_answer, multi_turn=False):
     conv.append_message(conv.roles[1], None)
 
     if model in OPENAI_MODEL_LIST:
-        judgment = chat_completion_openai(model, conv, temperature=0, max_tokens=2048)
+        judgment = chat_completion_azure_fallback(model, conv, temperature=0, max_tokens=2048)
     elif model in ANTHROPIC_MODEL_LIST:
         judgment = chat_completion_anthropic(
             model, conv, temperature=0, max_tokens=1024
@@ -436,6 +436,12 @@ def setup_openai_api(model: str, use_azure=False):
         openai.api_key = os.environ['OPENAI_API_KEY']
         return openai.ChatCompletion.create
 
+def chat_completion_azure_fallback(model, conv, temp, max_tokens):
+    """Use the Azure OpenAI API if env vars are set, otherwise use OpenAI directly."""
+    if "AZURE_OPENAI_ENDPOINT" in os.environ:
+        return chat_completion_openai_azure(model, conv, temp, max_tokens)
+    else:
+        return chat_completion_openai(model, conv, temp, max_tokens)
 
 def chat_completion_openai(model, conv, temperature, max_tokens):
     openai_chat_completion_func = setup_openai_api(model)
