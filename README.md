@@ -1,6 +1,4 @@
 # Japanese MT-Bench
-<<<<<<< HEAD
-=======
 
 This repo provides Japanese MT-Bench questions and prompts to evaluate your models with LLM-as-a-judge.
 
@@ -11,7 +9,6 @@ For more details, see the following:
 
 # FastChat
 | [**Demo**](https://chat.lmsys.org/) | [**Chatbot Arena**](https://arena.lmsys.org) | [**Discord**](https://discord.gg/HSWAKCrnFx) | [**Twitter**](https://twitter.com/lmsysorg) |
->>>>>>> 9f220b6019eef85853237952fd2f504ac3419b72
 
 This repo provides Japanese MT-Bench questions and prompts to evaluate your models with LLM-as-a-judge.
 
