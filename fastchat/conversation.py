@@ -24,6 +24,7 @@ class SeparatorStyle(IntEnum):
     ADD_NEW_LINE_SINGLE = auto()
     LLAMA2 = auto()
     JLLAMA2 = auto()
+    StableLMZephyr = auto()
     CHATGLM = auto()
     CHATML = auto()
     CHATINTERN = auto()
@@ -191,6 +192,40 @@ class Conversation:
                         ret += role + " " + message + seps[i % 2]
                 else:
                     ret += role + " "
+        #NOTE: SeparatorStyle.StableLMZephyr is same as the Duy modified SeparatorStyle.ADD_COLON_TWO bellow:
+        # # cf. /admin/home-duyphung/FastChat/fastchat/conversation.py
+        # elif self.sep_style == SeparatorStyle.ADD_COLON_TWO:
+        #     seps = [self.sep, self.sep2]
+        #     ret = self.system + seps[0] + "\n"
+        #     for i, (role, message) in enumerate(self.messages):
+        #         if message:
+        #             ret += role + "\n" + message + seps[i % 2] + "\n"
+        #         else:
+        #             ret += role + ""
+        #     return ret
+        elif self.sep_style == SeparatorStyle.StableLMZephyr:
+            # TODO: refactor - only self.sep needed
+            seps = [self.sep, self.sep2]
+            ret = self.system_message + seps[0] + "\n"
+            for i, (role, message) in enumerate(self.messages):
+                if message:
+                    ret += role + "\n" + message + seps[i % 2] + "\n"  # This will result in an extra trailing newline \n
+                    # like "the `gamma` object from `scipy.stats`.<|endoftext|>\n" but Duy did in this way.
+                    # This can be found in the dataset bellow:
+                    """
+                    from datasets import load_dataset
+                    from transformers import AutoTokenizer
+
+                    ds = load_from_disk("/fsx/codeai/FastChat/fastchat/train/data_hub/stablelm1.6b_instruct_glaive_math_slim_sharegpt_ultra_2048/")
+                    df = ds.to_pandas().iloc[0:200]
+                    input_id = df.loc[0, "input_ids"].tolist()
+                    input_id
+                    # [..., 1820, 1595, 33314, 63, 1665, 505, 1595, 2445, 23799, 30956, 29687, 100257, 198, ...]
+                    tokenizer.decode(input_id)
+                    # ...the `gamma` object from `scipy.stats`.<|endoftext|>\n...
+                    """
+                else:
+                    ret += role + "\n"
             return ret
         elif self.sep_style == SeparatorStyle.CHATGLM:
             # source: https://huggingface.co/THUDM/chatglm-6b/blob/1d240ba371910e9282298d4592532d7f0f3e9f3e/modeling_chatglm.py#L1302-L1308
@@ -1568,6 +1603,21 @@ register_conv_template(
         sep="</s>",
         stop_token_ids=[2],
         stop_str="</s>",
+    )
+)
+
+# Japanese StableLM Zephyr template
+register_conv_template(
+    Conversation(
+        name="ja-stablelm-zephyr-v1.0",
+        system_message="好奇心旺盛なユーザとAIアシスタントとの間の会話です。"
+        "アシスタントは、ユーザの質問に対して、役に立ち、詳細で、礼儀正しい回答を与えます。",
+        roles=("<|user|>", "<|assistant|>"),
+        messages=(),
+        offset=0,
+        sep_style=SeparatorStyle.StableLMZephyr,
+        sep="<|endoftext|>",
+        sep2="<|endoftext|>",
     )
 )
 
