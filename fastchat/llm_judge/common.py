@@ -14,6 +14,7 @@ from typing import Optional
 import openai
 import anthropic
 import cohere
+from langchain_anthropic import ChatAnthropic
 import google.generativeai as genai
 
 from fastchat.model.model_adapter import (
