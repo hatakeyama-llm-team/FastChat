@@ -515,7 +515,7 @@ def chat_completion_anthropic(model, conv, temperature, max_tokens, api_dict=Non
             while retry_count < max_retries:
                 try:
                     output = llm.invoke(prompt).content
-                    time.sleep(10)
+                    time.sleep(60)
                     break 
                 except Exception as e:
                     print(f"Error happened!!! : {e}")
