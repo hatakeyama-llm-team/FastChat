@@ -1,7 +1,10 @@
 # 03/22 フォーク
 ## TODO
-- temperatureのバグ修正
 - GPT-4以外のapiを呼べるようにする
+
+## DONE
+- temperatureのバグ修正
+    - /llm_judge/commpn.py: 173行目｡ temperature→ tempとする｡ 
 # Japanese MT-Bench
 
 This repo provides Japanese MT-Bench questions and prompts to evaluate your models with LLM-as-a-judge.

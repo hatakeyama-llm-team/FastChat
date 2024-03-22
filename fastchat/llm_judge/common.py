@@ -170,7 +170,8 @@ def run_judge_single(question, answer, judge, ref_answer, multi_turn=False):
     conv.append_message(conv.roles[1], None)
 
     if model in OPENAI_MODEL_LIST:
-        judgment = chat_completion_azure_fallback(model, conv, temperature=0, max_tokens=2048)
+        judgment = chat_completion_azure_fallback(
+            model, conv, temp=0, max_tokens=2048)
     elif model in ANTHROPIC_MODEL_LIST:
         judgment = chat_completion_anthropic(
             model, conv, temp=0, max_tokens=1024
@@ -278,10 +279,12 @@ def run_judge_pair(question, answer_a, answer_b, judge, ref_answer, multi_turn=F
 
     if model in OPENAI_MODEL_LIST:
         conv.set_system_message(system_prompt)
-        judgment = chat_completion_openai(model, conv, temperature=0, max_tokens=2048)
+        judgment = chat_completion_openai(
+            model, conv, temperature=0, max_tokens=2048)
     elif model in ANTHROPIC_MODEL_LIST:
         if system_prompt != "You are a helpful assistant.":
-            user_prompt = "[Instruction]\n" + system_prompt + "\n\n" + user_prompt
+            user_prompt = "[Instruction]\n" + \
+                system_prompt + "\n\n" + user_prompt
             conv.messages[0][1] = user_prompt
         judgment = chat_completion_anthropic(
             model, conv, temperature=0, max_tokens=1024
@@ -416,7 +419,8 @@ def play_a_match_pair(match: MatchPair, output_file: str):
             fout.write(json.dumps(result, ensure_ascii=False) + "\n")
 
     return result
-    
+
+
 def setup_openai_api(model: str, use_azure=False):
     from functools import partial
 
@@ -437,12 +441,14 @@ def setup_openai_api(model: str, use_azure=False):
         openai.api_key = os.environ['OPENAI_API_KEY']
         return openai.ChatCompletion.create
 
+
 def chat_completion_azure_fallback(model, conv, temperature, max_tokens):
     """Use the Azure OpenAI API if env vars are set, otherwise use OpenAI directly."""
     if "AZURE_OPENAI_ENDPOINT" in os.environ:
         return chat_completion_openai_azure(model, conv, temperature, max_tokens)
     else:
         return chat_completion_openai(model, conv, temperature, max_tokens)
+
 
 def chat_completion_openai(model, conv, temperature, max_tokens):
     openai_chat_completion_func = setup_openai_api(model)
@@ -518,7 +524,7 @@ def chat_completion_anthropic(model, conv, temperature, max_tokens, api_dict=Non
                     output = llm.invoke(prompt).content
                     print(oupput)
                     time.sleep(60)
-                    break 
+                    break
                 except Exception as e:
                     print(f"Error happened!!! : {e}")
                     retry_count += 1
@@ -549,8 +555,8 @@ def chat_completion_cohere(model, conv, temperature, max_tokens):
             co = cohere.Client(api_key=os.environ["COHERE_API_KEY"])
             prompt = conv.get_prompt()
             response = co.chat(
-                prompt, 
-                model=model, 
+                prompt,
+                model=model,
                 max_tokens=max_tokens,
                 temperature=temperature
             )
@@ -579,7 +585,8 @@ def chat_completion_palm(chat_state, model, conv, temperature, max_tokens):
     output = API_ERROR_OUTPUT
     for _ in range(API_MAX_RETRY):
         try:
-            response = chat_state.send_message(conv.messages[-2][1], **parameters)
+            response = chat_state.send_message(
+                conv.messages[-2][1], **parameters)
             output = response.text
             break
         except Exception as e:
@@ -589,12 +596,13 @@ def chat_completion_palm(chat_state, model, conv, temperature, max_tokens):
 
 
 def chat_completion_gemini(chat_state, model, conv, temperature, max_tokens):
-    safety_settings_NONE=[
-                            { "category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE" },
-                            { "category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE" },
-                            { "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE" },
-                            { "category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"}
-                        ]
+    safety_settings_NONE = [
+        {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
+        {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
+        {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE"},
+        {"category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+         "threshold": "BLOCK_NONE"}
+    ]
 
     assert model == "gemini-pro"
 
@@ -612,7 +620,8 @@ def chat_completion_gemini(chat_state, model, conv, temperature, max_tokens):
     output = API_ERROR_OUTPUT
     for _ in range(API_MAX_RETRY):
         try:
-            response = chat_state.send_message(conv.messages[-2][1], generation_config=parameters)
+            response = chat_state.send_message(
+                conv.messages[-2][1], generation_config=parameters)
             output = response.text
             break
         except Exception as e:
@@ -634,7 +643,8 @@ def chat_completion_bedrock(chat_state, model, conv, temperature, max_tokens):
     if chat_state is None:
         llm = BedrockChat(
             model_id=model,
-            model_kwargs={"temperature":temperature, "max_tokens_to_sample": max_tokens},
+            model_kwargs={"temperature": temperature,
+                          "max_tokens_to_sample": max_tokens},
         )
 
         memory = ConversationBufferMemory(return_messages=True)
@@ -671,7 +681,7 @@ def chat_completion_mistral(chat_state, model, conv, temperature, max_tokens):
         llm = ChatMistralAI(
             model=model,
             mistral_api_key=os.environ.get("MISTRAL_API_KEY"),
-            temperature=temperature, 
+            temperature=temperature,
             max_tokens=max_tokens,
         )
 
@@ -728,7 +738,8 @@ def load_pairwise_model_judgments(filename: str):
     judge_dict = {}
 
     if not os.path.exists(filename):
-        filenames = glob.glob(os.path.join(filename.replace(".jsonl", ""), "*.jsonl"))
+        filenames = glob.glob(os.path.join(
+            filename.replace(".jsonl", ""), "*.jsonl"))
     else:
         filenames = [filename]
 
@@ -778,7 +789,8 @@ def load_single_model_judgments(filename: str):
     judge_dict = {}
 
     if not os.path.exists(filename):
-        filenames = glob.glob(os.path.join(filename.replace(".jsonl", ""), "*.jsonl"))
+        filenames = glob.glob(os.path.join(
+            filename.replace(".jsonl", ""), "*.jsonl"))
     else:
         filenames = [filename]
 
