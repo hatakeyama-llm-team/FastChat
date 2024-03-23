@@ -171,10 +171,10 @@ def run_judge_single(question, answer, judge, ref_answer, multi_turn=False):
 
     if model in OPENAI_MODEL_LIST:
         judgment = chat_completion_azure_fallback(
-            model, conv, temp=0, max_tokens=2048)
+            model, conv, temperature=0, max_tokens=2048)
     elif model in ANTHROPIC_MODEL_LIST:
         judgment = chat_completion_anthropic(
-            model, conv, temp=0, max_tokens=1024
+            model, conv, temperature=0, max_tokens=1024
         )
     else:
         raise ValueError(f"Invalid judge model name: {model}")
