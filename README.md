@@ -1,10 +1,10 @@
 # 03/22 フォーク
-## TODO
-- GPT-4以外のapiを呼べるようにする
-
-## DONE
 - temperatureのバグ修正
     - /llm_judge/commpn.py: 173行目｡ temperature→ tempとする｡ 
+- 環境値数にOPENAI_MODEL_NAMEを設定すると､評価モデルを選べる
+    - デフォルト&公式はgpt-4
+    - 練習では､安いモデルがオススメ
+        - gpt-4-0125-preview
 # Japanese MT-Bench
 
 This repo provides Japanese MT-Bench questions and prompts to evaluate your models with LLM-as-a-judge.

@@ -456,9 +456,16 @@ def chat_completion_openai(model, conv, temperature, max_tokens):
     # TODO: allow additional params for toggling between azure api
     for _ in range(API_MAX_RETRY):
         try:
+            # print("calling..")
+            if os.environ.get("OPENAI_MODEL_NAME") == "":
+                model_name = "gpt-4"
+            else:
+                model_name = os.environ.get("OPENAI_MODEL_NAME")
             messages = conv.to_openai_api_messages()
             response = openai_chat_completion_func(
-                model=model,
+                # model="gpt-4-0125-preview",
+                model=model_name,
+                # model=model,
                 messages=messages,
                 n=1,
                 temperature=temperature,
